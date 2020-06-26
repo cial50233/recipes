@@ -1,5 +1,7 @@
 package fr.formation.recipes.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import fr.formation.recipes.dtos.IngredientCreateDto;
@@ -28,13 +30,11 @@ public class RecipeServiceImpl implements RecipeService{
 	@Override
 	public void create(RecipeCreateDto dto) {
 		Recipe recipe = new Recipe();
-		Ingredient ingredient = new Ingredient();
-		Step step = new Step();
 		
-		populateAndSave(dto, recipe, ingredient, step);
+		populateAndSave(dto, recipe);
 	}
 	
-	private void populateAndSave(RecipeCreateDto dto, Recipe recipe, Ingredient ingredient, Step step){
+	private void populateAndSave(RecipeCreateDto dto, Recipe recipe){
 		
 		recipe.setRecipeName(dto.getRecipeName());
 		recipe.setPreparingTimeMinutes(dto.getPreparingTimeMinutes());
@@ -42,30 +42,65 @@ public class RecipeServiceImpl implements RecipeService{
 		recipe.setServings(dto.getServings());
 		recipe.setDifficulty(dto.getDifficulty());
 		recipe.setDishImageUrl(dto.getDishImageUrl());
-		recipeRepo.save(recipe);
+		Recipe savedRecipe = recipeRepo.save(recipe);
 		
-		Recipe savedRecipe = recipeRepo.findByRecipeName(dto.getRecipeName());
-		
+		//Recipe savedRecipe = recipeRepo.findByRecipeName(dto.getRecipeName());
 
-		// persisting ingredients
+		// add ingredient to table
 
-		for (IngredientCreateDto ingredien : dto.getIngredients()) {
-
+	/*	for (IngredientCreateDto ingredien : dto.getIngredients()) {
+			Ingredient ingredient = new Ingredient();
 			ingredient.setIngredientWording(ingredien.getIngredientWording());
 			ingredient.setRecipe(savedRecipe);
 		    ingredientRepository.save(ingredient);
 
 		}
+		
+	*/
+		List<IngredientCreateDto> ingredients = dto.getIngredients();
 
-		// persisting steps
+	    ingredients.forEach(
 
+	        ingredientCreateDto -> {
+
+	          Ingredient ingredientToCreate = new Ingredient();
+
+	          ingredientToCreate.setIngredientWording(ingredientCreateDto.getIngredientWording());
+
+	          ingredientToCreate.setRecipe(savedRecipe);
+
+	          ingredientRepository.save(ingredientToCreate);
+
+	        });
+
+		// add steps to table
+/*
 		for (StepCreateDto ste : dto.getSteps()) {
+			
 			step.setStepWording(ste.getStepWording());
 			step.setStepOrder(ste.getStepOrder());
 			step.setRecipe((savedRecipe));
 		    stepRepository.save(step);
 
 		}
-	}
+	
+*/
+		List<StepCreateDto> steps = dto.getSteps();
 
+	    steps.forEach(
+
+	        stepCreateDto -> {
+
+	          Step stepToCreate = new Step();
+
+	          stepToCreate.setStepWording(stepCreateDto.getStepWording());
+	          
+	          stepToCreate.setStepOrder(stepCreateDto.getStepOrder());
+
+	          stepToCreate.setRecipe(savedRecipe);
+
+	          stepRepository.save(stepToCreate);
+
+	        });
+	}
 }

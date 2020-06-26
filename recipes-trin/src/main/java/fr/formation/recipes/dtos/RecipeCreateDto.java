@@ -13,7 +13,7 @@ import fr.formation.recipes.entities.Difficulty;
 
 public class RecipeCreateDto {
 
-	@NotNull
+	@NotBlank
 	@Size(min = 3, max = 100)
 	private String recipeName;
 
